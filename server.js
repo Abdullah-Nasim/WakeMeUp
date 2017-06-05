@@ -28,6 +28,6 @@ app.use(expressValidator({
 
 require('./routes/users.js')(app);
 
-app.listen(9191, function(){
-	console.log('Server Started at port 9191');
+app.listen(process.env.PORT || 5000, function(){
+	console.log('Server Started at port 5000');
 });
