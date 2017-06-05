@@ -1,0 +1,19 @@
+{
+  "name": "wakemeup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Abdullah",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "express-validator": "^3.2.0",
+    "mongojs": "^2.4.0",
+    "node-gcm": "^0.14.6",
+    "promise": "^7.1.1"
+  }
+}
