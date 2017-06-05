@@ -58,7 +58,7 @@ module.exports = (app) => {
 
 	});
 
-
+//The following API is used to get all the permissions of specific user
 
 app.post('/users/getpermissions', function(req, res){
 
@@ -93,31 +93,6 @@ app.post('/users/getpermissions', function(req, res){
 					}, function(err, docs){
 							resp.json(docs);
 				     });
-
-				/*var respPermissions = [], promises = [];
-
-				var respArray = new Array();*/
-
-				/*for (var i = 0; i <permissionsArray.length; i++) {
-
-					promises.push(processPermissions(permissionsArray[i].permissionId));
-
-				    }
-
-				function processPermissions(permissionId){
-					return new Promise(function(resolve, reject){
-
-						db.users.find({"_id": mongojs.ObjectId(permissionId)}, function(err, docs){
-							
-				       			resolve(docs[0]);
-				     });
-					}).then(function (result){
-						respPermissions.push(result);
-						resp.json(respPermissions)
-
-					});
-				}*/
-				    
 
 
 			});
@@ -268,7 +243,13 @@ app.post('/users/getpermissions', function(req, res){
 					if(err){
 					console.log(err);
 					}else{
-					resp.json(res._id);
+
+					var userRegisteredResp = [{
+						param: res._id,
+						msg: "User Registered SuccessFully"
+					}]
+
+					resp.json(userRegisteredResp);
 					}
 
 				});
