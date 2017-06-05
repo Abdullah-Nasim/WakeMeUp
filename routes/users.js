@@ -245,8 +245,9 @@ app.post('/users/getpermissions', function(req, res){
 					}else{
 
 					var userRegisteredResp = [{
-						param: res._id,
-						msg: "User Registered SuccessFully"
+						reg_id: res._id,
+						code: 200,
+						msg: "User Registered Successfully"
 					}]
 
 					resp.json(userRegisteredResp);
@@ -257,7 +258,8 @@ app.post('/users/getpermissions', function(req, res){
 				}else{
 
 					var userAlreadyExistsResp = [{
-						param: "System",
+						reg_id: "System",
+						code: 400,
 						msg: "User Already Exists"
 					}]
 
