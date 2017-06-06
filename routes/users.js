@@ -245,12 +245,11 @@ app.post('/users/getpermissions', function(req, res){
 					}else{
 
 					var userRegisteredResp = [{
-						reg_id: res._id,
-						code: 200,
+						param: res._id,
 						msg: "User Registered Successfully"
 					}]
 
-					resp.json(userRegisteredResp);
+					resp.status(200).json(userRegisteredResp);
 					}
 
 				});
@@ -258,12 +257,11 @@ app.post('/users/getpermissions', function(req, res){
 				}else{
 
 					var userAlreadyExistsResp = [{
-						reg_id: "System",
-						code: 400,
+						param: "System",
 						msg: "User Already Exists"
 					}]
 
-					resp.json(userAlreadyExistsResp);
+					resp.status(500).json(userAlreadyExistsResp);
 				}
 			});
 
