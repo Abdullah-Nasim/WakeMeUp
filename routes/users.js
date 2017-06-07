@@ -46,10 +46,9 @@ module.exports = (app) => {
 		    else{
 		    	console.log(response);
 
-				var notificationSent = [{
-						param: "System",
+				var notificationSent = {
 						msg: "The notification sent successfully"
-					}]
+					}
 
 					res.json(notificationSent);		    }
 
@@ -109,6 +108,7 @@ app.post('/users/getpermissions', function(req, res){
 		var resp = res;
 		var reqd = req;
 		var permissionId = req.body.permission_id;
+		var alarmId = req.body.user_id;
 
 		req.checkBody('user_id', 'UserID is Required').notEmpty();
 		req.checkBody('permission_id', 'PermissionID is Required').notEmpty();
@@ -136,33 +136,54 @@ app.post('/users/getpermissions', function(req, res){
 
 				if(contains(permissionsArray, permissionId)){
 
-					var userPermissionAlreadyAdded = [{
-						param: "System",
+					var userPermissionAlreadyAdded = {
 						msg: "The permission is already added"
-					}]
+					}
 
-					resp.json(userPermissionAlreadyAdded);
+					resp.status(500).json(userPermissionAlreadyAdded);
 
 				}else{
 
-					var update = {
+					var updatePrmission = {
 		    		$push: { permissions: {permissionId}}
 		  			};
 
-					db.users.update({"_id": mongojs.ObjectId(req.body.user_id)}, update, function(err, docs){
+		  			var updateAlarm = {
+		  			$push: { alarm_permissions: {alarmId}}
+		  			}
+
+
+					db.users.update({"_id": mongojs.ObjectId(req.body.user_id)}, updatePrmission, function(err, docs){
 
 						if(docs.length == 0){
 
-							var userDosentExistResp = [{
-								param: "System",
+							var userDosentExistResp = {
 								msg: "Unable to add the permission."
-							}]
+							}
 
-							resp.json(userDosentExistResp);
+							resp.status(500).json(userDosentExistResp);
 
 						}else{
 
-							resp.json(docs.ok);
+							db.users.update({"_id": mongojs.ObjectId(req.body.permission_id)}, updateAlarm, function(err, docs){
+
+								if(docs.length == 0){
+
+									var userDosentExistResp = {
+										msg: "Unable to add the alarm."
+									}
+
+									resp.status(500).json(userDosentExistResp);
+
+								}else{
+
+									var permissionAddedSuccessfully = {
+										msg: "Permission Added Successfully."
+									}
+									resp.json(permissionAddedSuccessfully);
+								}
+
+							});
 						}
 
 					});
@@ -234,7 +255,8 @@ app.post('/users/getpermissions', function(req, res){
 					device_id: req.body.device_id,
 					name: req.body.name,
 					phone: req.body.phone,
-					permissions: []
+					permissions: [],
+					alarm_permissions:[]
 
 					}
 
