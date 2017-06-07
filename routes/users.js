@@ -46,9 +46,10 @@ module.exports = (app) => {
 		    else{
 		    	console.log(response);
 
-				var notificationSent = {
+				var notificationSent = [{
+						param: "System",
 						msg: "The notification sent successfully"
-					}
+					}]
 
 					res.json(notificationSent);		    }
 
@@ -57,13 +58,13 @@ module.exports = (app) => {
 
 	});
 
-//The following API is used to get all the permissions of specific user
 
-app.post('/users/getpermissions', function(req, res){
+
+//The following API is used to get all the alarms of specific user
+app.post('/users/getalarms', function(req, res){
 
 		var resp = res;
 		var reqd = req;
-		var permissionId = req.body.permission_id;
 
 		req.checkBody('user_id', 'UserID is Required').notEmpty();
 
@@ -77,23 +78,99 @@ app.post('/users/getpermissions', function(req, res){
 
 			db.users.find({"_id": mongojs.ObjectId(req.body.user_id)}, function(err, docs){
 
-				var permissionsArray = docs[0].permissions;
-				var queryPermissions = [];
+				if(err){
+					var exception = {
+								msg: "Some unexpected error occured while connecting to the database."
+							}
 
-				for (var i = 0; i <permissionsArray.length; i++) {
+							resp.status(500).json(exception);
+				}
+				else
+				{
 
-					queryPermissions.push(mongojs.ObjectId(permissionsArray[i].permissionId));
+				if(docs.length == 0){
+					var wrongUserId = {
+								msg: "Unable to get alarms list. Make sure you have sent the correct user_id."
+							}
 
-				    }
+							resp.status(500).json(wrongUserId);
+				}else{
+					var alarmsArray = docs[0].alarm_permissions;
+					var queryAlarms = [];
 
-				db.users.find({
-					"_id": {
-						"$in": queryPermissions}
-					}, function(err, docs){
-							resp.json(docs);
-				     });
+					for (var i = 0; i < alarmsArray.length; i++) {
+
+						queryAlarms.push(mongojs.ObjectId(alarmsArray[i].alarmId));
+
+					    }
+
+					db.users.find({
+						"_id": {
+							"$in": queryAlarms}
+						}, function(err, docs){
+								resp.json(docs);
+					     });
+				}
+				
+
+				}
+			});
+			
+		}
+
+	});
 
 
+//The following API is used to get all the permissions of specific user
+app.post('/users/getpermissions', function(req, res){
+
+		var resp = res;
+		var reqd = req;
+
+		req.checkBody('user_id', 'UserID is Required').notEmpty();
+
+		var errors = req.validationErrors();
+
+		if(errors){
+
+			res.json(errors);
+
+		}else{
+
+			db.users.find({"_id": mongojs.ObjectId(req.body.user_id)}, function(err, docs){
+
+				if(err){
+
+				}
+				else
+				{
+
+				if(docs.length == 0){
+					var wrongUserId = {
+								msg: "Unable to get permissions list. Make sure you have sent the correct user_id."
+							}
+
+							resp.status(500).json(wrongUserId);
+				}else{
+					var permissionsArray = docs[0].permissions;
+					var queryPermissions = [];
+
+					for (var i = 0; i <permissionsArray.length; i++) {
+
+						queryPermissions.push(mongojs.ObjectId(permissionsArray[i].permissionId));
+
+					    }
+
+					db.users.find({
+						"_id": {
+							"$in": queryPermissions}
+						}, function(err, docs){
+								resp.json(docs);
+					     });
+				}
+				
+
+				}
 			});
 			
 		}
@@ -158,7 +235,7 @@ app.post('/users/getpermissions', function(req, res){
 						if(docs.length == 0){
 
 							var userDosentExistResp = {
-								msg: "Unable to add the permission."
+								msg: "Unable to add the permission. Specified user dosent exists."
 							}
 
 							resp.status(500).json(userDosentExistResp);
@@ -170,7 +247,7 @@ app.post('/users/getpermissions', function(req, res){
 								if(docs.length == 0){
 
 									var userDosentExistResp = {
-										msg: "Unable to add the alarm."
+										msg: "Unable to add the alarm. Specified user dosent exists."
 									}
 
 									resp.status(500).json(userDosentExistResp);
