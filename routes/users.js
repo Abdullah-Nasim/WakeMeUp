@@ -16,14 +16,18 @@ module.exports = (app) => {
 		});
 	});
 
-	app.post('/postnofication', function(req, res){
+	app.post('/postnotification', function(req, res){
 
 		req.checkBody('device_reg_token', 'Target Device Registration Token is Required').notEmpty();
 		var errors = req.validationErrors();
 
 		if(errors){
 
-			res.json(errors);
+			var notificationSendError = {
+						msg: "Unable to send the notification. Please check the device id."
+					}
+
+			res.status(500).json(notificationSendError);
 
 		}else{
 
@@ -46,10 +50,9 @@ module.exports = (app) => {
 		    else{
 		    	console.log(response);
 
-				var notificationSent = [{
-						param: "System",
+				var notificationSent = {
 						msg: "The notification sent successfully"
-					}]
+					}
 
 					res.json(notificationSent);		    }
 
