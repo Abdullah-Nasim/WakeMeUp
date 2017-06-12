@@ -284,6 +284,7 @@ app.post('/users/getpermissions', function(req, res){
 		var reqd = req;
 
 		req.checkBody('phone', 'Phone is Required').notEmpty();
+		req.checkBody('user_id', 'User Id is Required').notEmpty();
 
 		var errors = req.validationErrors();
 
@@ -295,14 +296,22 @@ app.post('/users/getpermissions', function(req, res){
 				if(docs.length == 0){
 
 					var userDosentExistResp = {
-						msg: "User dose not Exist"
+						msg: "User dose not exist"
 					}
 
 					resp.status(500).json(userDosentExistResp);
 
 				}else{
+					if(docs[0]._id == reqd.body.user_id){
+						var unabeToAddPermission = {
+						msg: "Unable to add permission for this user."
+					}
 
-					resp.json(docs);
+					resp.status(500).json(unabeToAddPermission);
+
+					}else{
+						resp.json(docs);
+					}
 				}
 
 			});
