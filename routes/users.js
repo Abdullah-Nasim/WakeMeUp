@@ -294,12 +294,11 @@ app.post('/users/getpermissions', function(req, res){
 
 				if(docs.length == 0){
 
-					var userDosentExistResp = [{
-						param: "System",
+					var userDosentExistResp = {
 						msg: "User dose not Exist"
-					}]
+					}
 
-					resp.json(userDosentExistResp);
+					resp.status(500).json(userDosentExistResp);
 
 				}else{
 
