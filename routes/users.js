@@ -5,7 +5,8 @@ var db = mongojs('Abdullah:1234@ds157631.mlab.com:57631/wakemeupdb', ['users']);
 var Promise = require('promise');
 
 
-module.exports = (app) => {
+module.exports = (app,upload) => {
+	
 
 	//The following API returns the list of all the registered users
 	app.get('/allusers', function(req, res){
@@ -377,6 +378,31 @@ app.post('/users/getpermissions', function(req, res){
 		}
 
 	});
+
+	//The following API is used to upload profile picture of the user.
+	app.post('/user/profile', function (req, res) {
+		upload(req, res, function (err, cb) {
+			if (err) {
+			// An error occurred when uploading
+			if(req.fileValidationError){
+				var fileTypeError = {
+					msg: req.fileValidationError
+				}
+				res.status(500).json(fileTypeError);
+			}else{
+				var unableToUpload = {
+					msg: "Unable to upload this file! Max file size allowed is 2 MB."
+				}
+				res.status(500).json(unableToUpload);
+			}
+		}
+		else{
+			// Everything went fine
+			res.status(200).json(req.file);
+		}
+		});
+	});
+
 
 	//The following API can be used to delete the user for some reason.
 	app.delete('/users/delete/:id?', function(req, res){
