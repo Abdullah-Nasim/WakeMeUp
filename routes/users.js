@@ -2,10 +2,9 @@
 var mongojs = require('mongojs');
 var gcm = require('node-gcm');
 var db = mongojs('Abdullah:1234@ds157631.mlab.com:57631/wakemeupdb', ['users']);
-var Promise = require('promise');
 
 
-module.exports = (app,upload) => {
+module.exports = (app) => {
 	
 
 	//The following API returns the list of all the registered users
@@ -344,6 +343,7 @@ app.post('/users/getpermissions', function(req, res){
 					device_id: req.body.device_id,
 					name: req.body.name,
 					phone: req.body.phone,
+					profile_img: req.body.profile_img,
 					permissions: [],
 					alarm_permissions:[]
 
@@ -379,29 +379,55 @@ app.post('/users/getpermissions', function(req, res){
 
 	});
 
-	//The following API is used to upload profile picture of the user.
-	app.post('/user/profile', function (req, res) {
-		upload(req, res, function (err, cb) {
-			if (err) {
-			// An error occurred when uploading
-			if(req.fileValidationError){
-				var fileTypeError = {
-					msg: req.fileValidationError
-				}
-				res.status(500).json(fileTypeError);
+
+app.post('/user/profile', function (req, res) {
+
+	req.checkBody('user_id', 'User ID is Required').notEmpty();
+	req.checkBody('profile_img', 'Link to the profile picture is Required').notEmpty();
+
+	var errors = req.validationErrors();
+
+	if(errors){
+		res.json(errors);
+	}else{
+		db.users.update({"_id": mongojs.ObjectId(req.body.user_id)}, {$set: {profile_img: req.body.profile_img}}, {multi: false}, function (err, docs) {
+			if(err){
+				res.json(err);
 			}else{
-				var unableToUpload = {
-					msg: "Unable to upload this file! Max file size allowed is 2 MB."
+				var profilePictureAdded = {
+						msg: "Profile picture added successfully"
 				}
-				res.status(500).json(unableToUpload);
+				res.status(200).json(profilePictureAdded);
 			}
-		}
-		else{
-			// Everything went fine
-			res.status(200).json(req.file);
-		}
 		});
-	});
+	}
+	
+});
+
+
+	// //The following API was written to use multer for image upload.
+	// app.post('/user/profile', function (req, res) {
+	// 	upload(req, res, function (err, cb) {
+	// 		if (err) {
+	// 		// An error occurred when uploading
+	// 		if(req.fileValidationError){
+	// 			var fileTypeError = {
+	// 				msg: req.fileValidationError
+	// 			}
+	// 			res.status(500).json(fileTypeError);
+	// 		}else{
+	// 			var unableToUpload = {
+	// 				msg: "Unable to upload this file! Max file size allowed is 2 MB."
+	// 			}
+	// 			res.status(500).json(unableToUpload);
+	// 		}
+	// 	}
+	// 	else{
+	// 		// Everything went fine
+	// 		res.status(200).json(req.file);
+	// 	}
+	// 	});
+	// });
 
 
 	//The following API can be used to delete the user for some reason.
