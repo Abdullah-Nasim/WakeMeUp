@@ -45,7 +45,11 @@ module.exports = (app) => {
 
 					db.users.update({"_id": mongojs.ObjectId(req.body.user_id)}, updateAlarmList, function(err, docs){                   
 						if(err){
+							var exception = {
+								msg: "Some unexpected error occured while connecting to the database."
+							}
 
+							resp.status(500).json(exception);
 						}else{
 							db.users.find({"_id": mongojs.ObjectId(req.body.alarm_id)}, function(err, docs){
 
@@ -64,8 +68,18 @@ module.exports = (app) => {
 							db.users.update({"_id": mongojs.ObjectId(req.body.alarm_id)}, updatePermissionsList, function(err, docs){
 								if(err){
 
+								var exception = {
+									msg: "Some unexpected error occured while connecting to the database."
+								}
+
+								resp.status(500).json(exception);
+
 								}else{
-									res.json(docs);
+
+									var permissionRevoked = {
+										msg: "Permission revoked successfully."
+									}
+									res.json(permissionRevoked);
 								}
 							});
 
