@@ -16,6 +16,74 @@ module.exports = (app) => {
 		});
 	});
 
+	//The following API is used to change the permission of alarm for specific user.
+	app.post('/user/change/permission', function(req, res){
+
+		req.checkBody('user_id', 'User Id is required').notEmpty();
+		req.checkBody('alarm_id', 'Permission Id is required').notEmpty();
+		req.checkBody('enabled', 'Permission value is required').notEmpty();
+		var errors = req.validationErrors();
+		if(errors){
+			var paramsRequired = {
+			msg: "Please check the parameters."
+				}
+			res.status(500).json(paramsRequired);  
+				}else{
+					db.users.find({"_id": mongojs.ObjectId(req.body.user_id)}, function(err, docs){
+
+					var alarmsArray = docs[0].alarm_permissions;
+
+						for (var i = 0; i <alarmsArray.length; i++) {
+							if (alarmsArray[i].alarmId === req.body.alarm_id) {
+								alarmsArray[i].enabled = req.body.enabled;
+							}
+						}
+					
+					var updateAlarmList = {
+		  			$set: { alarm_permissions: alarmsArray}
+					}
+
+					db.users.update({"_id": mongojs.ObjectId(req.body.user_id)}, updateAlarmList, function(err, docs){                   
+						if(err){
+
+						}else{
+							db.users.find({"_id": mongojs.ObjectId(req.body.alarm_id)}, function(err, docs){
+
+							var permissionsArray = docs[0].permissions;
+
+								for (var i = 0; i <permissionsArray.length; i++) {
+									if (permissionsArray[i].permissionId === req.body.user_id) {
+										permissionsArray[i].enabled = req.body.enabled;
+									}
+								}
+							
+							var updatePermissionsList = {
+							$set: { permissions: permissionsArray}
+							}
+
+							db.users.update({"_id": mongojs.ObjectId(req.body.alarm_id)}, updatePermissionsList, function(err, docs){
+								if(err){
+
+								}else{
+									res.json(docs);
+								}
+							});
+
+						
+							});
+						}
+					});
+
+				
+				});
+				
+					
+
+					}
+
+	});
+
+	//The following API is used to send the alram to specific user.
 	app.post('/postnotification', function(req, res){
 
 		req.checkBody('device_reg_token', 'Target Device Registration Token is Required').notEmpty();
@@ -225,11 +293,11 @@ app.post('/users/getpermissions', function(req, res){
 				}else{
 
 					var updatePrmission = {
-		    		$push: { permissions: {permissionId}}
+		    		$push: { permissions: {permissionId,"enabled": true}}
 		  			};
 
 		  			var updateAlarm = {
-		  			$push: { alarm_permissions: {alarmId}}
+		  			$push: { alarm_permissions: {alarmId,"enabled": true}}
 		  			}
 
 
