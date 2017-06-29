@@ -112,32 +112,59 @@ module.exports = (app) => {
 			res.status(500).json(notificationSendError);
 
 		}else{
+		db.users.find({"device_id": req.body.device_reg_token}, function(err, docs){
+			if(err){
 
-		var gcm = require('node-gcm');
- 
-		// Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
-		var sender = new gcm.Sender('AIzaSyCXleFoZJpFHBc-M9xQ-X8lUcACFCwBKFE');
-		 
-		// Prepare a message to be sent 
-		var message = new gcm.Message({
-		    data: { key1: 'msg1' }
-		});
-		 
-		// Specify which registration IDs to deliver the message to 
-		var regTokens = [req.body.device_reg_token];
+			}else{
+				var alarmsArray = docs[0].alarm_permissions;
 
-		// Actually send the message 
-		sender.send(message, { registrationTokens: regTokens }, function (err, response) {
-		    if (err) console.error(err);
-		    else{
-		    	console.log(response);
-
-				var notificationSent = {
-						msg: "The notification sent successfully"
+						function checkPermission(alarmsArray){
+							for (var i = 0; i <alarmsArray.length; i++) {
+							if (alarmsArray[i].alarmId === req.body.user_id) {
+								if(alarmsArray[i].enabled){
+									return true;
+								}else{
+									return false;
+								}
+							}
+						}
 					}
 
-					res.json(notificationSent);		    }
+					if(checkPermission(alarmsArray)){
+						var gcm = require('node-gcm');
+ 
+						// Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
+						var sender = new gcm.Sender('AIzaSyCXleFoZJpFHBc-M9xQ-X8lUcACFCwBKFE');
+						
+						// Prepare a message to be sent 
+						var message = new gcm.Message({
+						    data: { key1: 'msg1' }
+						});
+						
+						// Specify which registration IDs to deliver the message to 
+						var regTokens = [req.body.device_reg_token];
 
+						// Actually send the message 
+						sender.send(message, { registrationTokens: regTokens }, function (err, response) {
+						    if (err) console.error(err);
+						    else{
+						    	console.log(response);
+
+								var notificationSent = {
+										msg: "The notification sent successfully"
+									}
+
+									res.json(notificationSent);		    }
+
+						});
+					}
+					else{
+						var userPermissionRevoked = {
+						msg: "Unable to send the alarm the other user might have revoked your permission."
+					}
+						res.status(500).json(userPermissionRevoked);
+					}
+				}
 		});
 	}
 
