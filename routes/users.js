@@ -101,6 +101,8 @@ module.exports = (app) => {
 	app.post('/postnotification', function(req, res){
 
 		req.checkBody('device_reg_token', 'Target Device Registration Token is Required').notEmpty();
+		req.checkBody('user_id', 'User Id is Required').notEmpty();
+
 		var errors = req.validationErrors();
 
 		if(errors){
@@ -116,7 +118,7 @@ module.exports = (app) => {
 			if(err){
 
 			}else{
-				var alarmsArray = docs[0].alarm_permissions;
+				var alarmsArray = docs[0].permissions;
 
 						function checkPermission(alarmsArray){
 							for (var i = 0; i <alarmsArray.length; i++) {
