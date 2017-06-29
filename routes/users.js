@@ -122,7 +122,7 @@ module.exports = (app) => {
 
 						function checkPermission(alarmsArray){
 							for (var i = 0; i <alarmsArray.length; i++) {
-							if (alarmsArray[i].alarmId === req.body.user_id) {
+							if (alarmsArray[i].permissionId === req.body.user_id) {
 								if(alarmsArray[i].enabled){
 									return true;
 								}else{
