@@ -446,6 +446,7 @@ app.post('/users/getpermissions', function(req, res){
 		}else{
 
 			var userPhone = req.body.phone;
+			var userId;
 			db.users.find({phone: userPhone}, function(err, docs){
 				if(docs.length == 0){
 
@@ -476,13 +477,25 @@ app.post('/users/getpermissions', function(req, res){
 
 				});
 
-				}else{
+			}else{
+					userId = docs[0]._id;
 
-					var userAlreadyExistsResp = {
-						msg: "User Already Exists"
-					}
+					db.users.update({"phone": userPhone}, {$set: {device_id: req.body.device_id}}, {multi: false}, function (err, docs) {
 
-					resp.status(500).json(userAlreadyExistsResp);
+						if(err){
+							var unableToLogin = {
+							msg: "Unable Login at this time please try again later."
+							}
+							resp.status(500).json(unableToLogin);
+
+						}else{
+							var userLoggedIn = {
+							user_id: userId,
+							msg: "User Logged In Successfully"
+							}
+							resp.status(200).json(userLoggedIn);
+						}
+					});
 				}
 			});
 
