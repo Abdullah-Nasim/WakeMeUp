@@ -116,7 +116,11 @@ module.exports = (app) => {
 		}else{
 		db.users.find({"device_id": req.body.device_reg_token}, function(err, docs){
 			if(err){
+				var exception = {
+								msg: "Some unexpected error occured while connecting to the database."
+							}
 
+				resp.status(500).json(exception);
 			}else{
 				var alarmsArray = docs[0].permissions;
 
@@ -133,32 +137,49 @@ module.exports = (app) => {
 					}
 
 					if(checkPermission(alarmsArray)){
+
+
 						var gcm = require('node-gcm');
  
 						// Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
 						var sender = new gcm.Sender('AIzaSyCXleFoZJpFHBc-M9xQ-X8lUcACFCwBKFE');
-						
-						// Prepare a message to be sent 
-						var message = new gcm.Message({
-						    data: { key1: 'msg1' }
+
+						db.users.find({"_id": mongojs.ObjectId(req.body.user_id)}, function(err, docs){
+							
+							if(err){
+								var exception = {
+								msg: "Some unexpected error occured while connecting to the database."
+							}
+
+							resp.status(500).json(exception);
+							}else{
+								// Prepare a message to be sent 
+								var message = new gcm.Message({
+									data: { msg: 'The notificatin was sent from: ' +  docs[0].name}
+								});
+								
+								// Specify which registration IDs to deliver the message to 
+								var regTokens = [req.body.device_reg_token];
+
+								// Actually send the message 
+								sender.send(message, { registrationTokens: regTokens }, function (err, response) {
+									if (err) console.error(err);
+									else{
+										console.log(response);
+
+										var notificationSent = {
+												msg: "The notification sent successfully"
+											}
+
+											res.json(notificationSent);		    }
+
+								});
+							}
+				
+
 						});
+
 						
-						// Specify which registration IDs to deliver the message to 
-						var regTokens = [req.body.device_reg_token];
-
-						// Actually send the message 
-						sender.send(message, { registrationTokens: regTokens }, function (err, response) {
-						    if (err) console.error(err);
-						    else{
-						    	console.log(response);
-
-								var notificationSent = {
-										msg: "The notification sent successfully"
-									}
-
-									res.json(notificationSent);		    }
-
-						});
 					}
 					else{
 						var userPermissionRevoked = {
